@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>2EAF4EC2-BA1F-4116-9999-2CBE287C9089</string>
+	<key>IDESourceControlProjectName</key>
+	<string>MaterialViewSample</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>3BFB650B67C3B37DD5E32CB0F88A4E3C23611EEE</key>
+		<string>https://github.com/karticodes/MaterialView.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>MaterialViewSample/MaterialViewSample.xcodeproj</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>3BFB650B67C3B37DD5E32CB0F88A4E3C23611EEE</key>
+		<string>../../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://github.com/karticodes/MaterialView.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>111</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>3BFB650B67C3B37DD5E32CB0F88A4E3C23611EEE</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>3BFB650B67C3B37DD5E32CB0F88A4E3C23611EEE</string>
+			<key>IDESourceControlWCCName</key>
+			<string>MaterialView</string>
+		</dict>
+	</array>
+</dict>
+</plist>
