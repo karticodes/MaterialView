@@ -10,7 +10,7 @@ import UIKit
 //MARK: - Array Extension
 extension Array {
   mutating func removeObject<U: Equatable>(object: U) -> Bool {
-    for (idx, objectToCompare) in enumerate(self) {
+    for (idx, objectToCompare) in self.enumerate() {
       if let to = objectToCompare as? U {
         if object == to {
           self.removeAtIndex(idx)
@@ -55,9 +55,9 @@ Optional
   
   returns the number of items in MaterialView
   
-  :param: view current MaterialView instance
+  - parameter view: current MaterialView instance
   
-  :returns: number of items in MaterialView
+  - returns: number of items in MaterialView
   */
   func numberOfItems(inMaterialView view: MaterialView)->Int
   
@@ -66,9 +66,9 @@ Optional
   
   returns the minimum space between items
   
-  :param: view current MaterialView instance
+  - parameter view: current MaterialView instance
   
-  :returns: minimum space between items
+  - returns: minimum space between items
   */
   func minimumSpacingBetweenButtons(inMaterialView view:MaterialView)->CGFloat
   
@@ -77,10 +77,10 @@ Optional
 
   returns the Material Button
   
-  :param: view current MaterialView instance
-  :param: index current item index
+  - parameter view: current MaterialView instance
+  - parameter index: current item index
   
-  :returns: button for the index w/o `hint`, `hintTextColor`, `hintBackgroundColor`, `hintTextFont`
+  - returns: button for the index w/o `hint`, `hintTextColor`, `hintBackgroundColor`, `hintTextFont`
   */
   func materialView(view:MaterialView, materialButtonAtIndex index: Int)->MaterialButton
   
@@ -91,12 +91,12 @@ Optional
   
   **Default - MaterialDirection.Top**
   
-  :param: view current MaterialView instance
-  :param: frame frame in rect of Menu Button
+  - parameter view: current MaterialView instance
+  - parameter frame: frame in rect of Menu Button
   
-  :returns: direction of material view items
+  - returns: direction of material view items
   */
-  optional func materialMenu(view: MaterialView, buttonDirectionInRect frame:CGRect)->MaterialDirection
+  optional func itemsDirection(inMaterialView view: MaterialView)->MaterialDirection
   
   /**
   **Optional**
@@ -105,9 +105,9 @@ Optional
   
   **Default - MaterialDirection.Left**
   
-  :param: view current MaterialView instance
+  - parameter view: current MaterialView instance
   
-  :returns: direction of hints
+  - returns: direction of hints
   */
   optional func hintDirection(inMaterialView view: MaterialView)->MaterialDirection
   
@@ -118,9 +118,9 @@ Optional
   
   **Default - false**
   
-  :param: view current MaterialView instance
+  - parameter view: current MaterialView instance
   
-  :returns: bool specifies the visibility of hints
+  - returns: bool specifies the visibility of hints
   */
   optional func shouldShowHint(inMaterialView view: MaterialView)->Bool
   
@@ -131,9 +131,9 @@ Optional
   
   **Default - Transparent**
   
-  :param: view current MaterialView instance
+  - parameter view: current MaterialView instance
   
-  :returns: number of items in MaterialView
+  - returns: number of items in MaterialView
   */
   optional func overlayColor(inMaterialView view: MaterialView)->UIColor
   
@@ -142,7 +142,7 @@ Optional
 
   Material view items appeared after the animation.
   
-  :param: view current MaterialView instance
+  - parameter view: current MaterialView instance
   */
   optional func materialViewItemsDidAppear(view:MaterialView)
   
@@ -151,7 +151,7 @@ Optional
 
   Material view items disappeared after the animation.
   
-  :param: view current MaterialView instance
+  - parameter view: current MaterialView instance
   */
   optional func materialViewItemsDidDisappear(view:MaterialView)
   
@@ -160,8 +160,8 @@ Optional
 
   User has clicked the material item
   
-  :param: view current MaterialView instance
-  :param: index index of clicked material view item
+  - parameter view: current MaterialView instance
+  - parameter index: index of clicked material view item
   */
   optional func materialView(view : MaterialView, clickedButtonAtIndex index:Int)
 }
@@ -175,9 +175,9 @@ Use the following initializer to show the button
 
 `init(menuButton: UIButton, frameInWindow buttonFrame: CGRect, delegate: MaterialViewDelegate)`
 
-:param: menuButton button to be displayed on the window
-:param: buttonFrame CGRect w.r.t window
-:param: delegate MaterialViewDelegate to populate the items
+- parameter menuButton: button to be displayed on the window
+- parameter buttonFrame: CGRect w.r.t window
+- parameter delegate: MaterialViewDelegate to populate the items
 
 */
 class MaterialView: NSObject {
@@ -243,7 +243,7 @@ class MaterialView: NSObject {
   /**
   performs Menu Button click action
   
-  :param: sender MenuButton instance
+  - parameter sender: MenuButton instance
   */
   func menuButtonClicked(sender: UIButton!){
     if let _ = animationTimer{
@@ -259,7 +259,7 @@ class MaterialView: NSObject {
   private func initValues(){
     items = delegate.numberOfItems(inMaterialView: self)
 
-    if let dir = delegate.materialMenu?(self, buttonDirectionInRect: menuButton.frame){
+    if let dir = delegate.itemsDirection?(inMaterialView: self){
       direction = dir
     }
     if let show = delegate.shouldShowHint?(inMaterialView: self){
@@ -323,7 +323,7 @@ extension MaterialView{
       buttons.append(btn)
     }
     
-    var duration = 0.5/CGFloat(items)
+    let duration = 0.5/CGFloat(items)
     items = 0
     animationTimer = NSTimer.scheduledTimerWithTimeInterval(NSTimeInterval(duration), target: self, selector: Selector("animateShowNextItem:"), userInfo: nil, repeats: true)
   }
@@ -333,14 +333,14 @@ extension MaterialView{
       invalidateTimer()
       return
     }
-    var btn = buttons[items]
+    let btn = buttons[items]
     btn.buttonWillAppear()
     items++
   }
   
   func hideMenu(){
     hideHints()
-    var duration = 0.5/CGFloat(items)
+    let duration = 0.5/CGFloat(items)
     animationTimer = NSTimer.scheduledTimerWithTimeInterval(NSTimeInterval(duration), target: self, selector: Selector("animateHideNextItem:"), userInfo: nil, repeats: true)
   }
     
@@ -349,7 +349,7 @@ extension MaterialView{
       invalidateTimer()
       return
     }
-    var btn = buttons[items-1]
+    let btn = buttons[items-1]
     btn.buttonWillDisappear()
     items--
   }

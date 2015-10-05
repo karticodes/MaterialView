@@ -28,23 +28,23 @@ class ViewController: UIViewController {
   }
   
   override func viewDidAppear(animated: Bool) {
-    var btn = UIButton()
+    let btn = UIButton()
     btn.backgroundColor = UIColor.redColor()
     btn.layer.cornerRadius = 35.0
     materialView = MaterialView(menuButton: btn, frameInWindow: CGRectMake(50, CGRectGetMidY(view.frame)-35.0, 70, 70), delegate: self)
   }
   
   func randomColor()->UIColor{
-    var hue = ((CGFloat(arc4random()) % 256.0) / 256.0 );
-    var saturation = ((CGFloat(arc4random()) % 128.0) / 256.0 ) + 0.5;
-    var brightness = ((CGFloat(arc4random()) % 128.0) / 256.0 ) + 0.5;
-    var color = UIColor(hue: hue, saturation: saturation, brightness: brightness, alpha: 1.0)
+    let hue = ((CGFloat(arc4random()) % 256.0) / 256.0 );
+    let saturation = ((CGFloat(arc4random()) % 128.0) / 256.0 ) + 0.5;
+    let brightness = ((CGFloat(arc4random()) % 128.0) / 256.0 ) + 0.5;
+    let color = UIColor(hue: hue, saturation: saturation, brightness: brightness, alpha: 1.0)
     return color
   }
 }
 
 extension ViewController: MaterialViewDelegate{
-  func materialMenu(view: MaterialView, buttonDirectionInRect frame: CGRect) -> MaterialDirection {
+  func itemsDirection(inMaterialView view: MaterialView) -> MaterialDirection {
     return MaterialDirection(rawValue: itemsDirectionControl.selectedSegmentIndex)!
   }
   
@@ -57,7 +57,7 @@ extension ViewController: MaterialViewDelegate{
   }
   
   func materialView(view: MaterialView, materialButtonAtIndex index: Int) -> MaterialButton {
-    var btn = MaterialButton(frame: CGRectMake(100, 100, 70, 70))
+    let btn = MaterialButton(frame: CGRectMake(100, 100, 70, 70))
     btn.hint = "button " + "\(index)"
     btn.hintTextFont = UIFont(name: "Arial", size: 14.0)
     btn.hintTextColor = UIColor.blackColor()

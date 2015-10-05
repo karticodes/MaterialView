@@ -7,9 +7,10 @@
 
 import UIKit
 
+//MARK: - Array Extension
 extension Array {
   mutating func removeObject<U: Equatable>(object: U) -> Bool {
-    for (idx, objectToCompare) in enumerate(self) {
+    for (idx, objectToCompare) in self.enumerate() {
       if let to = objectToCompare as? U {
         if object == to {
           self.removeAtIndex(idx)
@@ -21,30 +22,188 @@ extension Array {
   }
 }
 
+/**
+enum to define the direction of menu and hints
+*/
 @objc enum MaterialDirection: Int{
   case Top, Bottom, Left, Right
 }
 
-typealias ButtonHints = (hint: String, backgroundColor: UIColor, textColor: UIColor)
+//MARK: - MaterialViewDelegate Protocol Definition
+/**
+MaterialViewDelegate
 
+Required
+
+- `func numberOfItems(inMaterialView view: MaterialView)->Int`
+- `func minimumSpacingBetweenButtons(inMaterialView view:MaterialView)->CGFloat`
+- `func materialView(view:MaterialView, materialButtonAtIndex index: Int)->MaterialButton`
+
+Optional
+
+- `func materialMenu(view: MaterialView, buttonDirectionInRect frame:CGRect)->MaterialDirection`
+- `func hintDirection(inMaterialView view: MaterialView)->MaterialDirection`
+- `func shouldShowHint(inMaterialView view: MaterialView)->Bool`
+- `func overlayColor(inMaterialView view: MaterialView)->UIColor`
+- `func materialViewItemsDidAppear(view:MaterialView)`
+- `func materialViewItemsDidDisappear(view:MaterialView)`
+- `func materialView(view : MaterialView, clickedButtonAtIndex index:Int)`
+*/
 @objc protocol MaterialViewDelegate{
+  /**
+  **Required**
+  
+  returns the number of items in MaterialView
+  
+  - parameter view: current MaterialView instance
+  
+  - returns: number of items in MaterialView
+  */
   func numberOfItems(inMaterialView view: MaterialView)->Int
+  
+  /**
+  **Required**
+  
+  returns the minimum space between items
+  
+  - parameter view: current MaterialView instance
+  
+  - returns: minimum space between items
+  */
   func minimumSpacingBetweenButtons(inMaterialView view:MaterialView)->CGFloat
+  
+  /**
+  **Required**
+
+  returns the Material Button
+  
+  - parameter view: current MaterialView instance
+  - parameter index: current item index
+  
+  - returns: button for the index w/o `hint`, `hintTextColor`, `hintBackgroundColor`, `hintTextFont`
+  */
   func materialView(view:MaterialView, materialButtonAtIndex index: Int)->MaterialButton
   
-  optional func materialMenu(view: MaterialView, buttonDirectionInRect frame:CGRect)->MaterialDirection
+  /**
+  **Optional**
+
+  returns the enum which specifies the direction of material view items
+  
+  **Default - MaterialDirection.Top**
+  
+  - parameter view: current MaterialView instance
+  - parameter frame: frame in rect of Menu Button
+  
+  - returns: direction of material view items
+  */
+  optional func itemsDirection(inMaterialView view: MaterialView)->MaterialDirection
+  
+  /**
+  **Optional**
+
+  returns the enum which specifies the direction of hints
+  
+  **Default - MaterialDirection.Left**
+  
+  - parameter view: current MaterialView instance
+  
+  - returns: direction of hints
+  */
   optional func hintDirection(inMaterialView view: MaterialView)->MaterialDirection
+  
+  /**
+  **Optional**
+
+  returns a bool specifies the visibility of hints
+  
+  **Default - false**
+  
+  - parameter view: current MaterialView instance
+  
+  - returns: bool specifies the visibility of hints
+  */
   optional func shouldShowHint(inMaterialView view: MaterialView)->Bool
+  
+  /**
+  **Optional**
+
+  returns the color of the background overlay
+  
+  **Default - Transparent**
+  
+  - parameter view: current MaterialView instance
+  
+  - returns: number of items in MaterialView
+  */
   optional func overlayColor(inMaterialView view: MaterialView)->UIColor
+  
+  /**
+  **Optional**
+
+  Material view items appeared after the animation.
+  
+  - parameter view: current MaterialView instance
+  */
   optional func materialViewItemsDidAppear(view:MaterialView)
+  
+  /**
+  **Optional**
+
+  Material view items disappeared after the animation.
+  
+  - parameter view: current MaterialView instance
+  */
   optional func materialViewItemsDidDisappear(view:MaterialView)
-  optional func materialView(view : MaterialView, didClickedButtonAtIndex index:Int)
+  
+  /**
+  **Optional**
+
+  User has clicked the material item
+  
+  - parameter view: current MaterialView instance
+  - parameter index: index of clicked material view item
+  */
+  optional func materialView(view : MaterialView, clickedButtonAtIndex index:Int)
 }
 
+//MARK: - MaterialView Class
+/**
+**MaterialView**
+
+**Note -**
+Use the following initializer to show the button
+
+`init(menuButton: UIButton, frameInWindow buttonFrame: CGRect, delegate: MaterialViewDelegate)`
+
+- parameter menuButton: button to be displayed on the window
+- parameter buttonFrame: CGRect w.r.t window
+- parameter delegate: MaterialViewDelegate to populate the items
+
+*/
 class MaterialView: NSObject {
   
   var menuButton: UIButton!
   var delegate: MaterialViewDelegate!
+  var isMenuItemsVisible: Bool{
+    get{
+      return (buttons.count > 0)
+    }
+  }
+  
+  var hidden: Bool = false{
+    didSet{
+      if isMenuItemsVisible{
+        hideHints()
+        for btn in buttons{
+          buttons.removeObject(btn)
+          btn.removeFromSuperview()
+        }
+        overlayView?.hidden = true
+        tapGesture = nil
+      }
+      menuButton.hidden = hidden
+    }
+  }
   
   private var direction = MaterialDirection.Top
   private var hintDirection = MaterialDirection.Left
@@ -57,7 +216,7 @@ class MaterialView: NSObject {
   private var tapGesture: UITapGestureRecognizer?
   private var overlayView: UIView?
   
-  var mainWindow: UIWindow{
+  private var mainWindow: UIWindow{
     return UIApplication.sharedApplication().delegate!.window!!
   }
   
@@ -71,6 +230,9 @@ class MaterialView: NSObject {
     animateMenuButton()
   }
   
+  /**
+  Animates the scale of menu button from 0.1 to 1.0
+  */
   func animateMenuButton(){
     self.menuButton.transform = CGAffineTransformMakeScale(0.1, 0.1)
     UIView.animateWithDuration(0.5, animations: { () -> Void in
@@ -78,6 +240,11 @@ class MaterialView: NSObject {
     })
   }
   
+  /**
+  performs Menu Button click action
+  
+  - parameter sender: MenuButton instance
+  */
   func menuButtonClicked(sender: UIButton!){
     if let _ = animationTimer{
       return
@@ -89,10 +256,10 @@ class MaterialView: NSObject {
     }
   }
   
-  func initValues(){
+  private func initValues(){
     items = delegate.numberOfItems(inMaterialView: self)
 
-    if let dir = delegate.materialMenu?(self, buttonDirectionInRect: menuButton.frame){
+    if let dir = delegate.itemsDirection?(inMaterialView: self){
       direction = dir
     }
     if let show = delegate.shouldShowHint?(inMaterialView: self){
@@ -104,8 +271,9 @@ class MaterialView: NSObject {
   }
 }
 
+//MARK: - Show/Hide Items
 extension MaterialView{
-  func getInitialSpace()->CGFloat{
+  private func getInitialSpace()->CGFloat{
     var space: CGFloat
     switch direction{
     case .Top:
@@ -120,7 +288,7 @@ extension MaterialView{
     return space
   }
   
-  func setCenterPoint(inout btn: MaterialButton,inout totalSpace: CGFloat, spacing: CGFloat){
+  private func setCenterPoint(inout btn: MaterialButton,inout totalSpace: CGFloat, spacing: CGFloat){
     switch direction{
     case .Top:
       btn.centerPoint = CGPointMake(btn.originPoint.x, totalSpace-(spacing+CGRectGetHeight(btn.frame)/2))
@@ -149,13 +317,13 @@ extension MaterialView{
       btn.delegate = self
       btn.addTarget(self, action: Selector("materialButtonClicked:"), forControlEvents: .TouchUpInside)
       setCenterPoint(&btn, totalSpace: &totalSpace, spacing: spacing)
-      btn.initialScale = CGVectorMake(CGRectGetWidth(menuButton.frame)/CGRectGetWidth(btn.frame), CGRectGetHeight(menuButton.frame)/CGRectGetHeight(btn.frame))
       addHint(forButton: btn)
+      btn.initialScale = CGVectorMake(CGRectGetWidth(menuButton.frame)/CGRectGetWidth(btn.frame), CGRectGetHeight(menuButton.frame)/CGRectGetHeight(btn.frame))
       mainWindow.insertSubview(btn, belowSubview: (buttons.count == 0 ? menuButton: buttons[index-1]))
       buttons.append(btn)
     }
     
-    var duration = 0.5/CGFloat(items)
+    let duration = 0.5/CGFloat(items)
     items = 0
     animationTimer = NSTimer.scheduledTimerWithTimeInterval(NSTimeInterval(duration), target: self, selector: Selector("animateShowNextItem:"), userInfo: nil, repeats: true)
   }
@@ -165,14 +333,14 @@ extension MaterialView{
       invalidateTimer()
       return
     }
-    var btn = buttons[items]
+    let btn = buttons[items]
     btn.buttonWillAppear()
     items++
   }
   
   func hideMenu(){
     hideHints()
-    var duration = 0.5/CGFloat(items)
+    let duration = 0.5/CGFloat(items)
     animationTimer = NSTimer.scheduledTimerWithTimeInterval(NSTimeInterval(duration), target: self, selector: Selector("animateHideNextItem:"), userInfo: nil, repeats: true)
   }
     
@@ -181,21 +349,21 @@ extension MaterialView{
       invalidateTimer()
       return
     }
-    var btn = buttons[items-1]
+    let btn = buttons[items-1]
     btn.buttonWillDisappear()
     items--
   }
   
-  func invalidateTimer(){
+  private func invalidateTimer(){
     animationTimer?.invalidate()
     animationTimer = nil
   }
   
   func materialButtonClicked(sender: MaterialButton){
-    delegate?.materialView?(self, didClickedButtonAtIndex: sender.tag)
+    delegate?.materialView?(self, clickedButtonAtIndex: sender.tag)
   }
   
-  func addTapGesture(behindButton button: MaterialButton){
+  private func addTapGesture(behindButton button: MaterialButton){
     if overlayView == nil{
       overlayView = UIView(frame: mainWindow.frame)
       overlayView!.userInteractionEnabled = true
@@ -214,6 +382,7 @@ extension MaterialView{
   }
 }
 
+//MARK: - MaterialButtonDelegate Implementation
 extension MaterialView : MaterialButtonDelegate{
   func buttonDidAppearAnimated(button: MaterialButton) {
     if button.tag == buttons.count-1{
@@ -234,6 +403,7 @@ extension MaterialView : MaterialButtonDelegate{
   }
 }
 
+//MARK: - Show/Hide Hints
 extension MaterialView{
   func showHints(){
     if shouldShowHints{
@@ -281,7 +451,7 @@ extension MaterialView{
     case .Top:
       lblFrame.size.width = CGRectGetWidth(btnRect)
       lblFrame.origin.x = CGRectGetMinX(btnRect)
-      lblFrame.origin.y = CGRectGetMinY(btnRect)-spacing-CGRectGetHeight(lblFrame)
+      lblFrame.origin.y = CGRectGetMinY(btnRect)-(spacing+CGRectGetHeight(lblFrame))
       label.textAlignment = .Center
     case .Bottom:
       lblFrame.size.width = CGRectGetWidth(btnRect)
@@ -289,7 +459,7 @@ extension MaterialView{
       lblFrame.origin.y = CGRectGetMaxY(btnRect)+spacing
       label.textAlignment = .Center
     case .Left:
-      lblFrame.origin.x = CGRectGetMinX(btnRect)-spacing-CGRectGetWidth(lblFrame)
+      lblFrame.origin.x = CGRectGetMinX(btnRect)-(spacing+CGRectGetWidth(lblFrame))
       lblFrame.origin.y = CGRectGetMidY(btnRect)-(CGRectGetHeight(lblFrame)/2.0)
       label.textAlignment = .Right
     case .Right:

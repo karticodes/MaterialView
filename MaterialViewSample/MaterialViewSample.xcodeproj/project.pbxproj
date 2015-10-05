@@ -170,6 +170,7 @@
 		546E52191B3980FD00015E55 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastSwiftMigration = 0700;
 				LastUpgradeCheck = 0630;
 				ORGANIZATIONNAME = "Karthik M R";
 				TargetAttributes = {
@@ -425,6 +426,7 @@
 				546E52421B3980FD00015E55 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		546E52431B3980FD00015E55 /* Build configuration list for PBXNativeTarget "MaterialViewSampleTests" */ = {
 			isa = XCConfigurationList;
@@ -433,6 +435,7 @@
 				546E52451B3980FD00015E55 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
